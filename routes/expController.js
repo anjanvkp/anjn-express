@@ -5,10 +5,10 @@ const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
 
 router.get('/', ensureAuthenticated, (req, res) => {
-    EXP.find({'usern': req.user.email}, (err, docs) => {
+    EXP.find({ 'usern': req.user.email }, (err, docs) => {
         if (!err) {
             res.render("exp/list", {
-                list: docs,  viewTitle: "ANJAN - LIST EXPENSES", user: req.user
+                list: docs, viewTitle: "ANJAN - LIST EXPENSES", user: req.user
             });
         } else {
             console.log('Error in retrieving EXP list: ' + err);
@@ -20,7 +20,7 @@ router.get('/add', ensureAuthenticated, (req, res) => {
     EXP.find((err, docs) => {
         if (!err) {
             res.render("exp/add", {
-                list: docs,  viewTitle: "ANJAN - ADD EXPENSES", user: req.user, tm: Date.now()
+                list: docs, viewTitle: "ANJAN - ADD EXPENSES", user: req.user, tm: Date.now()
             });
         } else {
             console.log('Error in retrieving EXP list: ' + err);
@@ -29,7 +29,12 @@ router.get('/add', ensureAuthenticated, (req, res) => {
 });
 
 router.post('/fetch', ensureAuthenticated, (req, res) => {
-    EXP.find({'pto': req.body.pto}, (err, docs) => {
+    EXP.find({
+        'dt': {
+            '$gte': new Date(req.body.dt),
+            '$lte': new Date(req.body.dt1)
+        }
+    }, (err, docs) => {
         if (!err) {
             res.json(docs);
         } else {
@@ -47,48 +52,48 @@ router.post('/', ensureAuthenticated, (req, res) => {
 
 router.post('/trf', ensureAuthenticated, (req, res) => {
     const details = new EXP();
-    details.rid= req.body.rid;
+    details.rid = req.body.rid;
     details.dt = req.body.dt;
-    details.mode= req.body.mode;
-    details.pto= req.body.pto;
-    details.head= req.body.head;
-    details.grp= req.body.grp;
-    details.amt= req.body.amt;
+    details.mode = req.body.mode;
+    details.pto = req.body.pto;
+    details.head = req.body.head;
+    details.grp = req.body.grp;
+    details.amt = req.body.amt;
     details.purp = req.body.purp;
-    details.usern= req.user.email;
-    details.type= req.body.type;
+    details.usern = req.user.email;
+    details.type = req.body.type;
     details.save();
 
     const details1 = new EXP();
-    details1.rid= req.body.rid;
+    details1.rid = req.body.rid;
     details1.dt = req.body.dt;
-    details1.mode= req.body.pto;
-    details1.pto= req.body.mode;
-    details1.head= req.body.head;
-    details1.grp= req.body.grp;
-    details1.amt= "-" + req.body.amt;
+    details1.mode = req.body.pto;
+    details1.pto = req.body.mode;
+    details1.head = req.body.head;
+    details1.grp = req.body.grp;
+    details1.amt = "-" + req.body.amt;
     details1.purp = req.body.purp;
-    details1.usern= req.user.email;
-    details1.type= req.body.type;
+    details1.usern = req.user.email;
+    details1.type = req.body.type;
     details1.save();
-    res.redirect("/exp/list");
+    res.redirect("/exp");
 });
 
 function insertRecord(req, res) {
     const details = new EXP();
-    details.rid= req.body.rid;
+    details.rid = req.body.rid;
     details.dt = req.body.dt;
-    details.mode= req.body.mode;
-    details.pto= req.body.pto;
-    details.head= req.body.head;
-    details.grp= req.body.grp;
-    details.amt= req.body.amt;
+    details.mode = req.body.mode;
+    details.pto = req.body.pto;
+    details.head = req.body.head;
+    details.grp = req.body.grp;
+    details.amt = req.body.amt;
     details.purp = req.body.purp;
-    details.usern= req.user.email;
-    details.type= req.body.type;
+    details.usern = req.user.email;
+    details.type = req.body.type;
     details.save((err, doc) => {
         if (!err)
-            res.redirect('exp/list');
+            res.redirect('/exp');
         else {
             if (err.name == 'ValidationError') {
                 handleValidationError(err, req.body);
@@ -105,7 +110,7 @@ function insertRecord(req, res) {
 function updateRecord(req, res) {
     EXP.findOneAndUpdate({ _id: req.body._id }, req.body, { new: true }, (err, doc) => {
         if (!err) {
-            res.redirect('exp/list');
+            res.redirect('/exp');
         } else {
             if (err.name == 'ValidationError') {
                 handleValidationError(err, req.body);
